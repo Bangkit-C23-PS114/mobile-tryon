@@ -1,8 +1,12 @@
 package com.example.storyapp.viewmodel
 
+import android.provider.Settings.Global.getString
+import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.storyapp.R
 import com.example.storyapp.dataclass.RequestRegister
 import com.example.storyapp.dataclass.ResponseMsg
 import com.example.storyapp.retrofit.ApiConfig
@@ -29,9 +33,11 @@ class RegisterViewModel : ViewModel() {
                 val responseBody = response.body()
                 if (response.isSuccessful) {
                     isError = false
+                    Log.d("tag","success")
                     _message.value = responseBody?.message.toString()
                 } else {
                     isError = true
+                    Log.d("tag","no success")
                     _message.value = response.message() }
             }
 

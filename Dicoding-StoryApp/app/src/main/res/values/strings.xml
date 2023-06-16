@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Story App</string>
+    <string name="app_name">Virtual Try On App</string>
     <string name="select_photo">Select photo</string>
     <string name="from_gallery">From Gallery</string>
     <string name="take_picture">Take Picture</string>
@@ -22,13 +22,15 @@
     <string name="change_language">Change Language</string>
     <string name="logout">Logout</string>
     <string name="flat_illustration">Flat illustration</string>
-    <string name="welcome_to_storyapp">Welcome to StoryApp</string>
+    <string name="welcome_to_storyapp">Welcome to TryOn App</string>
 
     <string name="post_as">Post story as </string>
+    <string name="hello_as">Hello </string>
+
     <string name="choose_picture">Choose a picture</string>
     <string name="input_picture">Please input picture</string>
     <string name="input_des">Please input description</string>
-    <string name="share_story">Share your story</string>
+    <string name="share_story">Add Image</string>
     <string name="detail_title">%1$s\'s Story</string>
 
 
@@ -53,7 +55,7 @@
     <string name="email_taken">Email is already taken</string>
     <string name="unauthorized">Email or password might be wrong</string>
     <string name="user_created">User created</string>
-    <string name="success_login">Login successfully. Message:</string>
+    <string name="success_login">Login successfully</string>
     <string name="error_message">Error message :</string>
     <string name="message">Message  :</string>
     <string name="success_load">Load successfully. Message:</string>

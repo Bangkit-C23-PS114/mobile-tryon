@@ -5,6 +5,11 @@
     android:layout_height="match_parent">
 
     <item
+        android:id="@+id/profile"
+        android:iconTint="@color/black"
+        android:title="Profile"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/lang"
         android:iconTint="@color/black"
         android:title="@string/change_language"

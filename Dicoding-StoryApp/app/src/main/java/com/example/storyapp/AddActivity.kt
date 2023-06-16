@@ -12,6 +12,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
@@ -23,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModelProvider
 import com.example.storyapp.databinding.ActivityAddBinding
+import com.example.storyapp.ml.UserImgEnc
 import com.example.storyapp.viewmodel.AddViewModel
 import com.example.storyapp.viewmodel.LoginViewModel
 import com.example.storyapp.viewmodel.ViewModelFactory
@@ -31,7 +33,12 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.tensorflow.lite.DataType
+import org.tensorflow.lite.support.image.TensorImage
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.io.*
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.text.SimpleDateFormat
 import java.util.*
 private const val MAXIMAL_SIZE = 1000000
@@ -79,7 +86,7 @@ class AddActivity : AppCompatActivity() {
 
 
     }
-    private fun reduceFileImage(file: File): File {
+    private fun reduceFileImage(file: File): File? {
         val bitmap = BitmapFactory.decodeFile(file.path)
         var compressQuality = 100
         var streamLength: Int
@@ -92,7 +99,96 @@ class AddActivity : AppCompatActivity() {
         } while (streamLength > MAXIMAL_SIZE)
         bitmap.compress(Bitmap.CompressFormat.JPEG, compressQuality, FileOutputStream(file))
         return file
+//        val originalBitmap = BitmapFactory.decodeFile(file.path)
+//        val targetWidth = 192
+//        val targetHeight = 256
+//        // Calculate the aspect ratio of the original image
+//        val originalWidth = originalBitmap.width
+//        val originalHeight = originalBitmap.height
+//        val scaleFactor = Math.min(targetWidth.toFloat() / originalWidth, targetHeight.toFloat() / originalHeight)
+//
+//        // Resize the image using the calculated scale factor
+//        val resizedWidth = (originalWidth * scaleFactor).toInt()
+//        val resizedHeight = (originalHeight * scaleFactor).toInt()
+//        val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, resizedWidth, resizedHeight, false)
+//
+//        // Create a file to save the resized image
+//        val outputFile = File.createTempFile("resized_image", ".jpg")
+//        val outputStream = FileOutputStream(outputFile)
+//
+//        // Compress and save the resized bitmap to the file
+//        try {
+//            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+//            outputStream.flush()
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//            return null
+//        } finally {
+//            outputStream.close()
+//        }
+//        // Return the file object
+//        return outputFile
     }
+//    fun getMaskOutfit(imgFile: File): Array<ByteArray>? {
+//        try {
+//            val model = UserImgEnc.newInstance(applicationContext)
+//            val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 256, 192, 3), DataType.FLOAT32)
+//
+//            // Load and preprocess the image using TensorImage
+//            val bitmap: Bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
+//            val tensorImage = TensorImage(DataType.FLOAT32)
+//            tensorImage.load(bitmap)
+//            val inputBuffer: ByteBuffer = tensorImage.buffer
+//
+//            // Resize the input buffer to match the expected input shape
+//            val reshapedBuffer = ByteBuffer.allocateDirect(1 * 256 * 192 * 3 * 4) // Assuming 4 bytes per float value
+//            reshapedBuffer.order(ByteOrder.nativeOrder())
+//            reshapedBuffer.rewind()
+//
+//            // Copy the input buffer to the resized buffer, assuming RGB pixel format
+//            for (y in 0 until bitmap.height) {
+//                for (x in 0 until bitmap.width) {
+//                    val pixelValue = inputBuffer.getFloat((y * bitmap.width + x) * 3) // Assuming RGB order
+//                    reshapedBuffer.putFloat(pixelValue)
+//                }
+//            }
+//
+//            inputFeature0.loadBuffer(reshapedBuffer)
+//
+//            // Run inference
+//            val outputs = model.process(inputFeature0)
+//            val outputFeature0 = outputs.outputFeature0AsTensorBuffer
+//
+//            // Process the outputFeature0 to obtain the binary mask
+//            val binaryMaskBitmap = Bitmap.createBitmap(256, 192, Bitmap.Config.ARGB_8888)
+//            val outputArray = outputFeature0.floatArray
+//            var index = 0
+//            for (y in 0 until 192) {
+//                for (x in 0 until 256) {
+//                    val pixelValue = outputArray[index++]
+//                    val color = if (pixelValue >= 0.5f) 255 else 0
+//                    binaryMaskBitmap.setPixel(x, y, color)
+//                }
+//            }
+//            model.close()
+//            val resultMatrix = (Array(192) { ByteArray(256) })
+//            if (resultMatrix != null) {
+//                for (row in resultMatrix) {
+//                    for (value in row) {
+//                        val intValue = value.toInt() and 0xFF // Convert byte to unsigned int value
+//                        println(intValue)
+//                    }
+//                }
+//            }
+//
+//            return resultMatrix
+//        } catch (e: IOException) {
+//            e.printStackTrace()
+//        }
+//
+//
+//        return (Array(192) { ByteArray(256) })
+//    }
     private fun uriToFile(selectedImg: Uri, context: Context): File {
         val contentResolver: ContentResolver = context.contentResolver
         val myFile = createCustomTempFile(context)
@@ -117,7 +213,6 @@ class AddActivity : AppCompatActivity() {
             val myFile = uriToFile(selectedImg, this@AddActivity)
             getFile = myFile
             binding.imgPhoto.setImageURI(selectedImg)
-            binding.tvDes.requestFocus()
         }
     }
 
@@ -140,7 +235,6 @@ class AddActivity : AppCompatActivity() {
             val result = BitmapFactory.decodeFile(myFile.path)
             anyPhoto = true
             binding.imgPhoto.setImageBitmap(result)
-            binding.tvDes.requestFocus()
         }
     }
     private val timeStamp: String = SimpleDateFormat(
@@ -169,7 +263,6 @@ class AddActivity : AppCompatActivity() {
     }
 
     private fun uploadImage() {
-        val des = binding.tvDes.text.toString()
         when {
             getFile == null -> {
                 Toast.makeText(
@@ -180,23 +273,19 @@ class AddActivity : AppCompatActivity() {
 
 
             }
-            des.trim().isEmpty() -> {
-                Toast.makeText(
-                    this@AddActivity,
-                    getString(R.string.input_des),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
             else -> {
                 val file = reduceFileImage(getFile as File)
-                val description = des.toRequestBody("text/plain".toMediaType())
-                val requestImageFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-                val imageMultipart: MultipartBody.Part = MultipartBody.Part.createFormData(
-                    "photo",
-                    file.name,
-                    requestImageFile
-                )
-                addViewModel.upload(imageMultipart, description, token)
+                val requestImageFile = file?.asRequestBody("image/jpeg".toMediaTypeOrNull())
+//                val maskOutfit = file?.let { getMaskOutfit(it) }
+//                Log.d("TAG","mask content: $maskOutfit")
+//                val imageMultipart: MultipartBody.Part? = requestImageFile?.let {
+//                    MultipartBody.Part.createFormData(
+//                        "photo",
+//                        file?.name,
+//                        it
+//                    )
+//                }
+//                addViewModel.upload(imageMultipart, description, token)
 
             }
         }
@@ -280,3 +369,4 @@ class AddActivity : AppCompatActivity() {
         const val FILENAME_FORMAT = "MMddyyyy"
     }
 }
+

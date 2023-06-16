@@ -11,7 +11,7 @@ interface ApiService {
     @POST("register")
     fun createUser(@Body requestRegister: RequestRegister): Call<ResponseMsg>
 
-    @POST("login")
+    @POST("authenticate")
     fun fetchUser(@Body requestLogin: RequestLogin): Call<ResponseLogin>
 
     @GET("stories")

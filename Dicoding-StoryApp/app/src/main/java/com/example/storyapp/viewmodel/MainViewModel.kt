@@ -1,5 +1,6 @@
 package com.example.storyapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -26,14 +27,16 @@ class MainViewModel : ViewModel() {
             override fun onResponse(call: Call<ResponseLogin>, response: Response<ResponseLogin>) {
                 _isLoading.value = false
                 val responseBody = response.body()
-
+                Log.d("TAG", "Login created $response")
                 if (response.isSuccessful) {
+                    Log.d("TAG", "Login created $response")
                     isError = false
                     _userLogin.value = responseBody!!
-                    _message.value = "Login as ${_userLogin.value!!.loginResult.name}"
+                    _message.value = "Login as ${_userLogin.value!!.data[0]}"
                 } else {
                     isError = true
                     _message.value = response.message()
+                    Log.d("TAG", "Login not created hey $response")
                 }
             }
 

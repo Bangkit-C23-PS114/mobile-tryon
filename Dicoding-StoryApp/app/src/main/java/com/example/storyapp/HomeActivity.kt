@@ -11,13 +11,13 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.accessibility.AccessibilityEventCompat.setAction
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.storyapp.*
 import com.example.storyapp.databinding.ActivityHomeBinding
 import com.example.storyapp.dataclass.ListStory
-import com.example.storyapp.viewmodel.HomeViewModel
 import com.example.storyapp.viewmodel.LoginViewModel
 import com.example.storyapp.viewmodel.ViewModelFactory
 
@@ -25,7 +25,6 @@ import com.example.storyapp.viewmodel.ViewModelFactory
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
     private lateinit var token: String
-    private val homeViewModel: HomeViewModel by viewModels()
     private var isFinished = false
 
 
@@ -37,30 +36,15 @@ class HomeActivity : AppCompatActivity() {
         setAction()
 
         val layoutManager = LinearLayoutManager(this)
-        binding.rvStories.layoutManager = layoutManager
         val itemDecoration = DividerItemDecoration(this, layoutManager.orientation)
-        binding.rvStories.addItemDecoration(itemDecoration)
 
         val pref = MyPreference.getInstance(dataStore)
-        val loginViewModel =
+        val homeViewModel =
             ViewModelProvider(this, ViewModelFactory(pref))[LoginViewModel::class.java]
-
-
-
-        loginViewModel.getToken().observe(this) {
-            token = it
-            homeViewModel.getStories(token)
+        homeViewModel.getName().observe(this) {
+            binding.helloUser.text = StringBuilder(getString(R.string.hello_as)).append(" ").append(it)
         }
 
-        homeViewModel.message.observe(this) {
-            setUserData(homeViewModel.storiess)
-            showToast(it)
-        }
-
-
-        homeViewModel.isLoading.observe(this) {
-            showLoading(it)
-        }
 
 
     }
@@ -69,51 +53,16 @@ class HomeActivity : AppCompatActivity() {
         binding.fab.setOnClickListener {
             startActivity(Intent(this, AddActivity::class.java))
         }
-
-        binding.pullRefresh.setOnRefreshListener {
-            homeViewModel.getStories(token)
-            binding.pullRefresh.isRefreshing = false
-        }
     }
 
     private fun showLoading(isLoading: Boolean) {
         binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 
-    private fun showNoData(isNoData: Boolean) {
-        binding.imgNoData.visibility = if (isNoData) View.VISIBLE else View.GONE
-        binding.tvNoData.visibility = if (isNoData) View.VISIBLE else View.GONE
 
-    }
 
-    private fun showToast(msg: String) {
-        if (homeViewModel.isError && !isFinished) {
-            Toast.makeText(
-                this,
-                "${getString(R.string.error_load)} $msg",
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
 
-    private fun setUserData(story: List<ListStory>) {
 
-        if (story.isEmpty()) {
-            showNoData(true)
-        } else {
-            showNoData(false)
-            val listUserAdapter = ListStoryAdapter(story)
-            binding.rvStories.adapter = listUserAdapter
-
-            listUserAdapter.setOnItemClickCallback(object : ListStoryAdapter.OnItemClickCallback {
-                override fun onItemClicked(data: ListStory) {
-                    sendSelectedUser(data)
-
-                }
-            })
-        }
-
-    }
 
     private fun sendSelectedUser(story: ListStory) {
         val intent = Intent(this@HomeActivity, DetailActivity::class.java)
@@ -134,6 +83,13 @@ class HomeActivity : AppCompatActivity() {
             return true
         } else if (id == R.id.logout) {
             showAlertDialog()
+            return true
+        } else if (id == R.id.profile){
+            Toast.makeText(
+                this,
+                "${getString(R.string.success_login)}",
+                Toast.LENGTH_LONG
+            ).show()
             return true
         }
         return super.onOptionsItemSelected(item)

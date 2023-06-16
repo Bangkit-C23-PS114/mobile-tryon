@@ -5,11 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.adapters.TextViewBindingAdapter.setText
 import androidx.lifecycle.ViewModelProvider
 import com.example.storyapp.databinding.ActivityRegisBinding
 import com.example.storyapp.dataclass.RequestLogin
@@ -24,7 +26,9 @@ class SignUpActivity : AppCompatActivity() {
     private val regisViewModel: RegisterViewModel by viewModels()
     private val mainViewModel: MainViewModel by viewModels()
     private var isPasswordMatch: Boolean = false
-    lateinit var name: String
+    lateinit var firstname: String
+    lateinit var lastname: String
+
     private lateinit var email: String
     private lateinit var pass: String
 
@@ -63,8 +67,7 @@ class SignUpActivity : AppCompatActivity() {
 
         mainViewModel.userlogin.observe(this) {
             loginViewModel.saveLoginState(true)
-            loginViewModel.saveToken(it.loginResult.token)
-            loginViewModel.saveName(it.loginResult.name)
+            loginViewModel.saveName(it.data.get(0).firstName)
 
         }
         mainViewModel.isLoading.observe(this) {
@@ -93,24 +96,30 @@ class SignUpActivity : AppCompatActivity() {
 
 
         binding.btRegis.setOnClickListener {
+            Log.d("TAG","DATA BALID")
+
             binding.apply {
                 tiEmail.clearFocus()
-                tiName.clearFocus()
+                tiFirstname.clearFocus()
+                tiLastname.clearFocus()
                 tiPass.clearFocus()
                 tiCpass.clearFocus()
             }
 
-            if (isDataValid()) {
-                name = binding.tiName.text.toString().trim()
+
+                Log.d("TAG","DATA BALID")
+                firstname = binding.tiFirstname.text.toString().trim()
+                lastname = binding.tiLastname.text.toString().trim()
                 email = binding.tiEmail.text.toString().trim()
                 pass = binding.tiPass.text.toString().trim()
                 val user = RequestRegister(
-                    name,
                     email,
-                    pass
+                    pass,
+                    firstname,
+                    lastname,
                 )
+
                 regisViewModel.getResponseRegister(user)
-            }
         }
 
         binding.seePassword.setOnClickListener {
@@ -172,7 +181,7 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun isDataValid(): Boolean {
-        return binding.tiName.isNameValid && binding.tiEmail.isEmailValid &&
+        return binding.tiFirstname.isNameValid && binding.tiEmail.isEmailValid &&
                 binding.tiPass.isPassValid && binding.tiCpass.isCPassValid && isPasswordMatch
     }
 

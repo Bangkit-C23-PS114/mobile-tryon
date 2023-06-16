@@ -11,6 +11,7 @@ android {
     buildFeatures {
         dataBinding true
         viewBinding true
+        mlModelBinding true
     }
 
     defaultConfig {
@@ -25,12 +26,12 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField "String", "BASEURL", "\"https://story-api.dicoding.dev/v1/\""
+            buildConfigField "String", "BASEURL", "\"https://bangkit-c23-ps114.et.r.appspot.com/users/\""
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "BASEURL", "\"https://story-api.dicoding.dev/v1/\""
+            buildConfigField "String", "BASEURL", "\"https://bangkit-c23-ps114.et.r.appspot.com/users/\""
         }
     }
 
@@ -51,6 +52,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+    implementation 'org.tensorflow:tensorflow-lite-support:0.1.0'
+    implementation 'org.tensorflow:tensorflow-lite-metadata:0.1.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 

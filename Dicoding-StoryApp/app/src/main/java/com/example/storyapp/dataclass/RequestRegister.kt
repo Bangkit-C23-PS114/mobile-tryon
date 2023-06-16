@@ -1,16 +1,17 @@
 package com.example.storyapp.dataclass
 
 import android.os.Parcelable
+import android.provider.ContactsContract.FullNameStyle
+import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
 
 data class RequestRegister(
-    var name: String,
     var email: String,
-    var password: String
+    var password: String,
+    var firstName: String,
+    var lastName: String,
 )
-
-
 data class RequestLogin(
     var email: String,
     var password: String
@@ -23,11 +24,19 @@ data class ResponseMsg(
 
 
 data class ResponseLogin(
-    var error: Boolean,
     var message: String,
-    var loginResult: LoginResult
+    var data: List<DataLogin>,
 )
 
+@Parcelize
+data class DataLogin(
+    @SerializedName("id") var id: Int,
+    @SerializedName("firstName") var firstName: String,
+    @SerializedName("lastName") var lastName: String,
+    @SerializedName("fullName") var fullName: String,
+    @SerializedName("email") var email: String,
+    @SerializedName("password") var password: String
+):Parcelable
 
 data class LoginResult(
     var userId: String,

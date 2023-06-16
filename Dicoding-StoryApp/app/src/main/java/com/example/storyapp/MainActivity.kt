@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -48,9 +49,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         mainViewModel.message.observe(this) {
-            val usr = mainViewModel.userlogin.value
-            checkResponseeLogin(it, usr?.loginResult?.token, mainViewModel.isError, loginViewModel)
+//            checkResponseeLogin(it, mainViewModel.isError, loginViewModel)
+            Log.d("TAG","Response IN MAIN: ${mainViewModel.userlogin.value}")
+            if(mainViewModel.userlogin.value != null){
+                Toast.makeText(
+                    this,
+                    "${getString(R.string.success_login)}",
+                    Toast.LENGTH_LONG
+                ).show()
+                loginViewModel.saveLoginState(true)
+                loginViewModel.saveName(mainViewModel.userlogin.value?.data?.get(0).toString())
+            } else {
+                Toast.makeText(
+                    this,
+                    "${getString(R.string.unauthorized)}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
         }
+
+
 
         mainViewModel.isLoading.observe(this) {
             showLoading(it)
@@ -127,7 +146,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkResponseeLogin(
         msg: String,
-        tkn: String?,
         isError: Boolean,
         vm: LoginViewModel
     ) {
@@ -138,8 +156,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
             ).show()
             vm.saveLoginState(true)
-            if (tkn != null) vm.saveToken(tkn)
-            vm.saveName(mainViewModel.userlogin.value?.loginResult?.name.toString())
+            vm.saveName(mainViewModel.userlogin.value?.data?.get(0).toString())
         } else {
             when (msg) {
                 "Unauthorized" -> {
